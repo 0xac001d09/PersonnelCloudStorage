@@ -40,12 +40,12 @@ func (resp *RespMsg) JSONString() string {
 	return string(r)
 }
 
-// GenSimpleRespStream : 只包含code和message的响应体([]byte)
+// GenSimpleRespStream : 只包含code和message的响应体 ([]byte)
 func GenSimpleRespStream(code int, msg string) []byte {
 	return []byte(fmt.Sprintf(`{"code":%d,"msg":"%s"}`, code, msg))
 }
 
-// GenSimpleRespString : 只包含code和message的响应体(string)
+// GenSimpleRespString : 只包含code和message的响应体 (string)
 func GenSimpleRespString(code int, msg string) string {
 	return fmt.Sprintf(`{"code":%d,"msg":"%s"}`, code, msg)
 }
