@@ -18,6 +18,8 @@ import (
 1、用于向用户返回数据的resp对象
 2、用于接收用户请求的request对象的指针
 */
+
+// 上传文件接口
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		// 1、如果用户是请求，加载文件返回上传的http页面
@@ -41,7 +43,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 		fileMeta := meta.FileMeta{
 			FileName: head.Filename,
-			Location: "/Users/Jerry/gotemp/" + head.Filename,
+			Location: "/Users/zhangye/gotemp/" + head.Filename,
 			UploadAt: time.Now().Format("2006-01-02 15:04:05"),
 		}
 
@@ -64,26 +66,31 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		// 从头开始，文件指针偏移 0
 		newFile.Seek(0, 0)
 		fileMeta.FileSha1 = util.FileSha1(newFile)
+		//meta.UpdateFileMeta(fileMeta)
+		meta.UpdateFileMetaDB(fileMeta)
 
 		// 4、文件写入成功，给定成功信息
 		http.Redirect(w, r, "/file/upload/suc", http.StatusFound)
 	}
 }
 
-/**
-上传已完成 handler
-*/
+// 上传已完成 handler
 func UploadSucceedHandler(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "Upload finished!")
 }
 
-/**
-获取文件元信息 handler
-*/
+// 获取文件元信息接口
 func GetFileMetaHandler(w http.ResponseWriter, r *http.Request) {
+	// 解析，入参第一个为 fileHash
 	r.ParseForm()
 	filehash := r.Form["filehash"][0]
-	fileMeta := meta.GetFileMeta(filehash)
+	//fileMeta := meta.GetFileMeta(filehash)
+	fileMeta, err := meta.GetFileMetaDB(filehash)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	// 转成json返回客户端
 	data, err := json.Marshal(fileMeta)
 	if err != nil {
@@ -93,9 +100,7 @@ func GetFileMetaHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-/**
-文件下载接口
-*/
+// 文件下载接口
 func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	fsha1 := r.Form.Get("filehash")
@@ -121,9 +126,7 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-/**
-更新元信息接口（文件重命名）
-*/
+// 更新文件元信息接口（文件重命名
 func FileMetaUpdateHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	// 解析请求的参数列表，客户端带三个参数，操作类型、文件唯一标识（filesha1）、文件新名字
@@ -157,10 +160,7 @@ func FileMetaUpdateHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-/**
-删除文件接口
-*/
-
+// 删除文件接口
 func FileDeleteHandler(w http.ResponseWriter, r *http.Request) {
 	// 只接收一个参数 filesha1
 	r.ParseForm()
