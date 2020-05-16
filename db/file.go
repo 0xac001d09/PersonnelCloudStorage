@@ -48,6 +48,7 @@ func GetFileMeta(filehash string) (*TableFile, error) {
 
 	tfile := TableFile{}
 	// 这个方法总是会返回一个非空的值， 而它引起的错误则会被推延到数据行的 Scan 方法被调用为止。
+	// scan就是拿到结果来赋值
 	// 这句话相当于 err := db.QueryRow("SELECT username FROM users WHERE id=?", id).Scan(&username)
 	err = stmt.QueryRow(filehash).Scan(&tfile.FileHash, &tfile.FileName, &tfile.FileSize, &tfile.FileAddr)
 	if err != nil {
