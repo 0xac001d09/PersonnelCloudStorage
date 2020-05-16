@@ -6,6 +6,8 @@ import (
 	"net/http"
 )
 
+// go标准库中文文档 http://cngolib.com/database-sql.html
+
 func main() {
 
 	// 建立路由规则
